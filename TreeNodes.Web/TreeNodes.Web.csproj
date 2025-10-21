@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TreeNodes.Application\TreeNodes.Application.csproj" />
     <ProjectReference Include="..\TreeNodes.Infrastructure\TreeNodes.Infrastructure.csproj" />
+    <ProjectReference Include="..\TreeNodes.Auth\TreeNodes.Auth.csproj" />
   </ItemGroup>
 
 </Project>

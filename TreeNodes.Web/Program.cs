@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TreeNodes.Application;
+using TreeNodes.Auth;
 using TreeNodes.Infrastructure;
 using TreeNodes.Infrastructure.Database;
+using TreeNodes.Web.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,7 @@ builder.Host.UseSerilog();
 
 // Services
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddTreeNodesAuth(builder.Configuration);
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
@@ -25,8 +28,7 @@ builder.Services.AddControllers()
         options.SuppressModelStateInvalidFilter = true;
     });
 builder.Services.AddApplication();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerConfiguration();
 
 var app = builder.Build();
 
@@ -37,7 +39,8 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-// Global exception handling middleware
+// IMPORTANT: Global exception handling middleware MUST come before authentication middleware
+// This ensures authentication failures are caught, logged to the journal, and properly formatted
 app.UseMiddleware<TreeNodes.Web.Middlewares.GlobalExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -47,5 +50,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 app.Run();

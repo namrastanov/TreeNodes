@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TreeNodes.Application.Common.DTOs;
 using TreeNodes.Application.TreeNodes.Commands;
@@ -8,6 +9,7 @@ namespace TreeNodes.Web.Controllers;
 
 [ApiController]
 [Route("")]
+[Authorize]
 public class TreeController : ControllerBase
 {
     private readonly IMediator _mediator;

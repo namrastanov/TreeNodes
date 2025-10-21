@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using TreeNodes.Application.Common.Exceptions;
 using TreeNodes.Application.ExceptionJournal.Commands;
+using TreeNodes.Auth.Exceptions;
 
 namespace TreeNodes.Web.Middlewares;
 
@@ -52,18 +53,31 @@ public class GlobalExceptionHandlingMiddleware
             _logger.LogError(ex, "Unhandled exception captured. EventId={EventId}", eventId);
 
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-            if (ex is SecureException)
+            // Handle authentication exceptions with 401 Unauthorized
+            if (ex is AuthenticationException || ex is InvalidTokenException || ex is InvalidPartnerCodeException)
             {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsJsonAsync(new 
+                { 
+                    type = "Unauthorized", 
+                    id = eventId.ToString(), 
+                    data = new { message = ex.Message } 
+                });
+            }
+            else if (ex is SecureException)
+            {
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await context.Response.WriteAsJsonAsync(new { type = "Secure", id = eventId.ToString(), data = new { message = ex.Message } });
             }
             else if (ex is ValidationException vex)
             {
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await context.Response.WriteAsJsonAsync(new { type = "Secure", id = eventId.ToString(), data = new { message = string.Join("; ", vex.Errors.Select(e => e.ErrorMessage)) } });
             }
             else
             {
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 await context.Response.WriteAsJsonAsync(new { type = "Exception", id = eventId.ToString(), data = new { message = $"Internal server error ID = {eventId}" } });
             }
         }

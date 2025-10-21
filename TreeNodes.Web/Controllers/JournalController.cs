@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TreeNodes.Application.Common.DTOs;
 using TreeNodes.Application.ExceptionJournal.Queries;
@@ -7,6 +8,7 @@ namespace TreeNodes.Web.Controllers;
 
 [ApiController]
 [Route("")]
+[Authorize]
 public class JournalController : ControllerBase
 {
     private readonly IMediator _mediator;
