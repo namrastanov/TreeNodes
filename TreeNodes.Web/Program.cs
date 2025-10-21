@@ -1,34 +1,58 @@
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+using TreeNodes.Application;
+using TreeNodes.Auth;
+using TreeNodes.Infrastructure;
+using TreeNodes.Infrastructure.Database;
+using TreeNodes.Web.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Serilog configuration
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Debug()
+    .WriteTo.Console()
+    .CreateLogger();
+builder.Host.UseSerilog();
+
+// Services
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddTreeNodesAuth(builder.Configuration);
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Disable automatic 400 response for model validation errors
+        // Let exceptions bubble up to GlobalExceptionHandlingMiddleware
+        options.SuppressModelStateInvalidFilter = true;
+    });
+builder.Services.AddApplication();
+builder.Services.AddSwaggerConfiguration();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Migrate database at startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
+// IMPORTANT: Global exception handling middleware MUST come before authentication middleware
+// This ensures authentication failures are caught, logged to the journal, and properly formatted
+app.UseMiddleware<TreeNodes.Web.Middlewares.GlobalExceptionHandlingMiddleware>();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-});
-
+app.MapControllers();
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
