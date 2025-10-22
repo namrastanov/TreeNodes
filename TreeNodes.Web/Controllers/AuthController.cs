@@ -21,15 +21,15 @@ public class AuthController : ControllerBase
     /// Authenticates user by unique partner code and returns JWT auth token.
     /// Throws InvalidPartnerCodeException if authentication fails.
     /// </summary>
-    /// <param name="code">Partner authentication code</param>
+    /// <param name="request">Login request containing partner code</param>
     /// <returns>Token information containing JWT bearer token</returns>
     /// <exception cref="TreeNodes.Auth.Exceptions.InvalidPartnerCodeException">Thrown when partner code is invalid or missing</exception>
-    [HttpPost("api.user.partner.rememberMe")]
-    public ActionResult<TokenInfoDto> RememberMe([FromQuery] string code)
+    [HttpPost("api/auth/login")]
+    public ActionResult<TokenInfoDto> Login([FromBody] LoginRequestDto request)
     {
         // Let the service throw exceptions, which will be caught by GlobalExceptionHandlingMiddleware
         // This ensures authentication failures are logged to the journal
-        var token = _authService.Authenticate(code);
+        var token = _authService.Authenticate(request.Code);
 
         return Ok(new TokenInfoDto { Token = token });
     }

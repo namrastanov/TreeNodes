@@ -24,8 +24,8 @@ public class TreeController : ControllerBase
     /// </summary>
     /// <param name="treeName">Tree name.</param>
     /// <returns>Tree structure.</returns>
-    [HttpPost("api.user.tree.get")]
-    public async Task<ActionResult<NodeDto>> GetTree([FromQuery] string treeName)
+    [HttpGet("api/trees/{treeName}")]
+    public async Task<ActionResult<NodeDto>> GetTree([FromRoute] string treeName)
     {
         var result = await _mediator.Send(new GetTreeQuery(treeName));
         return Ok(result);
@@ -35,12 +35,11 @@ public class TreeController : ControllerBase
     /// Create a new node in a tree.
     /// </summary>
     /// <param name="treeName">Tree name.</param>
-    /// <param name="parentNodeId">Optional parent node id.</param>
-    /// <param name="nodeName">Node name.</param>
-    [HttpPost("api.user.tree.node.create")]
-    public async Task<ActionResult> Create([FromQuery] string treeName, [FromQuery] long? parentNodeId, [FromQuery] string nodeName)
+    /// <param name="request">Create node request containing parent node id and node name.</param>
+    [HttpPost("api/trees/{treeName}/nodes")]
+    public async Task<ActionResult> CreateNode([FromRoute] string treeName, [FromBody] CreateNodeRequestDto request)
     {
-        var id = await _mediator.Send(new CreateNodeCommand(treeName, parentNodeId, nodeName));
+        var id = await _mediator.Send(new CreateNodeCommand(treeName, request.ParentNodeId, request.NodeName));
         return Ok(new { id });
     }
 
@@ -48,8 +47,8 @@ public class TreeController : ControllerBase
     /// Delete a node and all its descendants.
     /// </summary>
     /// <param name="nodeId">Node id.</param>
-    [HttpPost("api.user.tree.node.delete")]
-    public async Task<ActionResult> Delete([FromQuery] long nodeId)
+    [HttpDelete("api/nodes/{nodeId}")]
+    public async Task<ActionResult> DeleteNode([FromRoute] long nodeId)
     {
         await _mediator.Send(new DeleteNodeCommand(nodeId));
         return Ok();
@@ -59,11 +58,11 @@ public class TreeController : ControllerBase
     /// Rename node enforcing sibling uniqueness.
     /// </summary>
     /// <param name="nodeId">Node id.</param>
-    /// <param name="newNodeName">New node name.</param>
-    [HttpPost("api.user.tree.node.rename")]
-    public async Task<ActionResult> Rename([FromQuery] long nodeId, [FromQuery] string newNodeName)
+    /// <param name="request">Rename request containing the new node name.</param>
+    [HttpPut("api/nodes/{nodeId}")]
+    public async Task<ActionResult> RenameNode([FromRoute] long nodeId, [FromBody] RenameNodeRequestDto request)
     {
-        await _mediator.Send(new RenameNodeCommand(nodeId, newNodeName));
+        await _mediator.Send(new RenameNodeCommand(nodeId, request.NewNodeName));
         return Ok();
     }
 }
