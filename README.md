@@ -1,5 +1,8 @@
 ## Project Overview: TreeNodes API
 
+### Improvements
+- **API**: Refactored API endpoints from dot-notation format (e.g., api.user.tree.get) to RESTful standards using proper HTTP verbs (GET, POST, PUT, DELETE), resource-based paths (e.g., GET /api/trees/{treeName}), and request bodies for POST/PUT operations.
+
 ### Technologies & Architecture
 - **Backend Framework**: ASP.NET Core Web API with .NET 8.0  
 - **Architecture**: Clean Architecture with separate layers (Domain, Application, Infrastructure, Web, Auth)  
