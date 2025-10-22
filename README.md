@@ -22,4 +22,9 @@
 - **Test Database**: EF Core InMemory database for isolated unit and integration tests
 
 ### Screenshot from the "journal" table with logged exceptions
-  <img width="828" height="137" alt="image" src="https://github.com/user-attachments/assets/ff9325cd-7ebe-4af1-bcd1-16b8036f0b50" />
+  <img width="1210" height="97" alt="Screenshot_2" src="https://github.com/user-attachments/assets/fed8ae4d-f39e-498a-8640-4929e1b9d988" />
+
+### Screenshot from the swagger
+  <img width="566" height="624" alt="Screenshot_1" src="https://github.com/user-attachments/assets/bc225dcc-48a7-4f21-aab9-a3ae24b45cda" />
+
+
