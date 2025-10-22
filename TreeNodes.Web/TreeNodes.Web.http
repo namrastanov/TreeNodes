@@ -1,6 +1,63 @@
 @TreeNodes.Web_HostAddress = http://localhost:5126
+@token = your-jwt-token-here
 
-GET {{TreeNodes.Web_HostAddress}}/weatherforecast/
+### Authentication - Login
+POST {{TreeNodes.Web_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "code": "your-partner-code"
+}
+
+###
+
+### Get Tree
+GET {{TreeNodes.Web_HostAddress}}/api/trees/myTree
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###
+
+### Create Node
+POST {{TreeNodes.Web_HostAddress}}/api/trees/myTree/nodes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "parentNodeId": 1,
+  "nodeName": "NewNode"
+}
+
+###
+
+### Rename Node
+PUT {{TreeNodes.Web_HostAddress}}/api/nodes/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "newNodeName": "RenamedNode"
+}
+
+###
+
+### Delete Node
+DELETE {{TreeNodes.Web_HostAddress}}/api/nodes/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###
+
+### Get Journal (Paginated)
+GET {{TreeNodes.Web_HostAddress}}/api/journal?skip=0&take=10
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###
+
+### Get Journal by ID
+GET {{TreeNodes.Web_HostAddress}}/api/journal/1
+Authorization: Bearer {{token}}
 Accept: application/json
 
 ###

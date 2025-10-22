@@ -24,13 +24,15 @@ public class GlobalExceptionHandlingMiddleware
 
     public async Task InvokeAsync(HttpContext context, IMediator mediator)
     {
+        // Enable buffering BEFORE processing the request so we can read the body later if needed
+        context.Request.EnableBuffering();
+        
         try
         {
             await _next(context);
         }
         catch (Exception ex)
         {
-            context.Request.EnableBuffering();
             string body = string.Empty;
             if (context.Request.ContentLength > 0)
             {
@@ -64,6 +66,11 @@ public class GlobalExceptionHandlingMiddleware
                     id = eventId.ToString(), 
                     data = new { message = ex.Message } 
                 });
+            }
+            else if (ex is Application.Common.Exceptions.NotFoundException)
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await context.Response.WriteAsJsonAsync(new { type = "Secure", id = eventId.ToString(), data = new { message = ex.Message } });
             }
             else if (ex is SecureException)
             {

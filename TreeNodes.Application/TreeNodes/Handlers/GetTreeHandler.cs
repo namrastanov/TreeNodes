@@ -1,14 +1,14 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using TreeNodes.Application.Common.DTOs;
+using TreeNodes.Application.Common.Exceptions;
 using TreeNodes.Application.Common.Interfaces;
 using TreeNodes.Application.TreeNodes.Queries;
-using TreeNodes.Domain.Entities;
 
 namespace TreeNodes.Application.TreeNodes.Handlers;
 
 /// <summary>
-/// Handler that returns full tree and creates it if missing.
+/// Handler that returns full tree.
 /// </summary>
 public class GetTreeHandler : IRequestHandler<GetTreeQuery, NodeDto>
 {
@@ -24,9 +24,7 @@ public class GetTreeHandler : IRequestHandler<GetTreeQuery, NodeDto>
         var tree = await _db.Trees.FirstOrDefaultAsync(t => t.Name == request.TreeName, cancellationToken);
         if (tree is null)
         {
-            tree = new Tree { Name = request.TreeName };
-            _db.Trees.Add(tree);
-            await _db.SaveChangesAsync(cancellationToken);
+            throw new NotFoundException($"Tree '{request.TreeName}' not found");
         }
 
         var roots = await _db.Nodes.AsNoTracking()

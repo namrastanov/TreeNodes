@@ -25,4 +25,12 @@ public class NodeNameNotUniqueException : SecureException
     public NodeNameNotUniqueException(string name) : base($"Node name '{name}' must be unique among siblings") { }
 }
 
+/// <summary>
+/// Exception thrown when a requested resource is not found.
+/// </summary>
+public class NotFoundException : Exception
+{
+    public NotFoundException(string message) : base(message) { }
+}
+
 

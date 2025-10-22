@@ -25,8 +25,8 @@ public class JournalController : ControllerBase
     /// <param name="take">Number of items to take.</param>
     /// <param name="filter">Optional filter.</param>
     /// <returns>Paginated journal range.</returns>
-    [HttpPost("api.user.journal.getRange")]
-    public async Task<ActionResult<JournalRangeDto>> GetRange([FromQuery] int skip, [FromQuery] int take, [FromBody] JournalFilterDto? filter)
+    [HttpGet("api/journal")]
+    public async Task<ActionResult<JournalRangeDto>> GetJournal([FromQuery] int skip, [FromQuery] int take, [FromQuery] JournalFilterDto? filter)
     {
         var result = await _mediator.Send(new GetJournalRangeQuery(skip, take, filter));
         return Ok(result);
@@ -37,8 +37,8 @@ public class JournalController : ControllerBase
     /// </summary>
     /// <param name="id">Journal record id.</param>
     /// <returns>Single journal record.</returns>
-    [HttpPost("api.user.journal.getSingle")]
-    public async Task<ActionResult<JournalDto>> GetSingle([FromQuery] long id)
+    [HttpGet("api/journal/{id}")]
+    public async Task<ActionResult<JournalDto>> GetJournalById([FromRoute] long id)
     {
         var result = await _mediator.Send(new GetJournalSingleQuery(id));
         return Ok(result);
